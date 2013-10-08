@@ -1,0 +1,26 @@
+OCamion Release Notes
+
+
+
+ocamlion-0.1
+--------------
+  Basic Description of Release:
+    The initial release of the package. Main algorithms for numerical
+    optimization plus some combinators for combinatorial optimization.
+
+  Features:
+    + Simplex Method
+    + Subplex Method
+    + Brents Method
+    + BFGS Gradient Dissent Search
+
+  BugFixes:
+    + None
+
+  Changed Module Interfaces:
+    + None
+
+  Contributers:
+    + Nicholas Lucaroni
+
+
