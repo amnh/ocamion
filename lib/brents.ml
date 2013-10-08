@@ -34,9 +34,9 @@ let bracket_region ?(v_min=neg_infinity) ?(v_max=infinity) f o' =
 
 (** Uses a combination of golden section searches and parabolic fits to find the
     optimal value of a function of one variable. **)
-let brents_method ?(max_iter=200) ?(v_min=neg_infinity) ?(v_max=infinity)
-                  ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
-                  f orig =
+let optimize ?(max_iter=200) ?(v_min=neg_infinity) ?(v_max=infinity)
+             ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
+              f orig =
   (*-- ensure value falls between range; if using one *)
   let minmax value = max (min v_max value) v_min in
   (*-- approximation of equality; based on optional argument above *)
@@ -112,14 +112,11 @@ let brents_method ?(max_iter=200) ?(v_min=neg_infinity) ?(v_max=infinity)
 
 
 (** Meta function above; we sequentially modify each variable ONCE; RAxML *)
-let brents_method_multi ?(max_iter=200) ?(v_min=minimum) ?(v_max=300.0)
-    ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
-    f orig =
+let optimize_multi ?(max_iter=200) ?(v_min=minimum) ?(v_max=300.0)
+    ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max) f orig =
   let rec do_single i ((a,x) as data) =
     if i < (Array.length a) then
-      let (v,fv) =
-        brents_method ~max_iter ~v_min ~v_max ~tol ~epsilon ~bracket (update_single i a) (a.(i),x)
-      in
+      let (v,fv) = optimize ~max_iter ~v_min ~v_max ~tol ~epsilon ~bracket (update_single i a) (a.(i),x) in
       let () = Array.set a i v in
       do_single (i+1) (a,fv)
     else

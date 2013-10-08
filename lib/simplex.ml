@@ -144,9 +144,9 @@ let shrink_simplex simplex f strategy i_l =
     four moves that can be done on the simplex are: reflection, expansion,
     contraction, and shrinkage. The degree to which these are done is modified
     by the strategy used. *)
-let simplex_method ?(termination_test=simplex_termination_stddev) ?(tol=tolerance)
-                   ?(simplex_strategy=default_simplex) ?(max_iter=100) ?(step=None)
-                    f (p,fp) =
+let optimize ?(termination_test=simplex_termination_stddev) ?(tol=tolerance)
+             ?(simplex_strategy=default_simplex) ?(max_iter=100) ?(step=None)
+              f (p,fp) =
   (* wrap function to keep track of the number of evaluations *)
   let i = ref 0 in
   let f = (fun x -> incr i; f x) in

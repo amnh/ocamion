@@ -15,7 +15,7 @@ val find_subspace : subplex_strategy -> float array -> int array list
 val subplex_termination :
   subplex_strategy -> float -> float array -> float array -> float array -> bool
 
-val subplex_method :
+val optimize :
   ?subplex_strategy:subplex_strategy ->
   ?tol:float ->
   ?max_iter:int ->

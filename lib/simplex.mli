@@ -22,7 +22,7 @@ val random_simplex :
 val initial_simplex :
   (float array -> 'a * float) -> float array * ('a * float) -> float array option -> 'a simplex
 
-val simplex_method :
+val optimize :
   ?termination_test:(float -> 'a simplex -> bool) ->
   ?tol:float ->
   ?simplex_strategy:simplex_strategy ->
