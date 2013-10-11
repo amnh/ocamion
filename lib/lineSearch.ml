@@ -11,7 +11,7 @@ let optimize ?(epsilon=epsilon) ~gradient ~maxstep ~direction f (point,fpoint) =
   (* scale direction so, |pstep| <= maxstep *)
   let setup_function point direction gradient = 
     let direction = (* ||dir|| <= maxstep *)
-      let magstep = magnitude direction in
+      let magstep = two_norm_vec direction in
       if magstep > maxstep
         then Array.map (fun x -> x *. maxstep /. magstep) direction 
         else direction

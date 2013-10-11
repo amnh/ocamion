@@ -42,12 +42,14 @@ val dot_product : float array -> float array -> float
 (** {6 Vector Math Functions} *)
 
 val add_veci : float array -> float array -> unit
+(** add two vectors without additional allocation; result in x *)
 
 val sub_vec : float array -> float array -> float array
-
-val magnitude : float array -> float
+(** functional subtraction of two vectors *)
 
 val matrix_map : (int -> int -> float -> float) -> float array array -> float array array
+(** map a function over a matrix *)
+
 
 (** {6 L^p Space Distance Functions} *)
 

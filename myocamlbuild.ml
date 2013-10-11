@@ -29,7 +29,18 @@ let () = dispatch begin function
      Options.ocamlmktop := ocamlfind "ocamlmktop";
     ()
   | After_rules ->
+
     (* pre-process / compile compatibility module *)
+    let compatibility_options = 
+      if major < 4 || ((major = 4) && minor <= 0)
+        then [A"-pp";A"camlp4of -DCOMPATIBILITY"]
+        else [A"-pp";A"camlp4of -UCOMPATIBILITY"]
+    in
+    flag ["ocaml";"use_compatibility";"ocamldoc"] (S compatibility_options);
+    flag ["ocaml";"use_compatibility";"ocamldep"] (S compatibility_options);
+    flag ["ocaml";"use_compatibility";"compile" ] (S compatibility_options);
+
+    (* pre-process / compile compatibility *)
     let compatibility_options = 
       if major < 4 || ((major = 4) && minor <= 0)
         then [A"-pp";A"camlp4of -DCOMPATIBILITY"]

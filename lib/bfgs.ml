@@ -1,11 +1,12 @@
+open Internal
 open Numerical
 
-(** BFGS Algorithm; Gradient Search Function; Numerical Recipes in C : 10.7 *)
+(** BFGS Algorithm; Gradient Search Function *)
 let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance)
              ?(gradient=gradient ~epsilon) ?(line_search=LineSearch.optimize)
-             (f : float array -> 'a * float) (p,fp) =
+             f (p,fp) =
   let n = Array.length p and nf = float_of_int (Array.length p) and get_cost x = snd x  in
-  let gradient f p fp : float array =
+  let gradient f p fp =
     let f x = get_cost @@ f x in
     gradient f p @@ get_cost fp
   in
@@ -18,7 +19,7 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
         test := max ((abs_float direction.(i)) /. temp) !test)
       test_array;
     (!test < (epsilon *. 4.0))
-  (* Test tolerance for zeroing the gradient *)
+  (* Test the tolerance for zeroing of the gradient *)
   and converged_g fp gradient test_array =
     let test = ref 0.0
     and denom = max fp 1.0 in
@@ -37,13 +38,13 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
       h
     and x_grad = gradient f_array x_array fx_array in
     let dir = Array.map (fun x -> ~-. x) x_grad
-    and mxstep = max_step *. (max (magnitude x_array) nf) in
+    and mxstep = max_step *. (max (two_norm_vec x_array) nf) in
     hessian, x_grad, mxstep, dir in
   (* Do a line search step --return new p, new fp, new dir, if converged *)
   let line_searcher f p fp gradient maxstep direction =
     let np,nfp = line_search ~gradient ~maxstep ~direction f (p,fp) in
     let direction = Array.init n (fun i -> np.(i) -. p.(i) ) in
-    np, nfp, direction, (converged_l direction np)
+    np, nfp, direction
   (* Update gradient --ret new gradient, difference of gradients,
      difference of gradient times hessian matrix, if converged *)
   and gradient_update hessian ograd f p fp = 
@@ -58,7 +59,7 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
           done;
           !res)
     in
-    ngrad, dgrad, hgrad, (converged_g (get_cost fp) ngrad p)
+    ngrad, dgrad, hgrad
   (* Update the hessian matrix --skips the update if fac not sufficiently positive *)
   and bfgs_update_matrix dgrad hgrad direc hessian =
     let fac = Numerical.dot_product dgrad direc
@@ -92,14 +93,14 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
   let iter = ref 0 in
   let rec main_loop hessian f p fp step direction grad =
     incr iter;
-    let np, nfp, direction, c = line_searcher f p fp grad step direction in
-    if c then
+    let np, nfp, direction = line_searcher f p fp grad step direction in
+    if converged_l direction np then
       (np,nfp)
     else if (!iter > max_iter) then begin
       (np,nfp) (* TODO: add warning on max iterations *)
     end else begin
-      let grad, dgrad, hgrad, c = gradient_update hessian grad f np nfp in
-      if c then begin
+      let grad, dgrad, hgrad = gradient_update hessian grad f np nfp in
+      if converged_g (get_cost nfp) grad np then begin
         (np,nfp)
       end else begin
         let hessian = bfgs_update_matrix dgrad hgrad direction hessian in

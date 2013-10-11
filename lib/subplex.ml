@@ -1,3 +1,4 @@
+open Internal
 open Numerical
 
 (** The Subplex strategy contains a simplex strategy and added features *)

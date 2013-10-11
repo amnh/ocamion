@@ -1,14 +1,12 @@
 open Numerical
 
-(** Here we define a simplex as a collection of points with attached data *)
 type 'a simplex = (float array * ('a * float)) array
 
-(** Simplex strategy defines how to expand, contract, and reflect a simplex *)
 type simplex_strategy = 
-  { alpha : float;  (** The Reflection factor *)
-     beta : float;  (** The Contraction factor *)
-    gamma : float;  (** The Expansion factor *)
-    delta : float;  (** The Shrinkage (Massive Contraction) factor *)
+  { alpha : float;  (* The Reflection factor *)
+     beta : float;  (* The Contraction factor *)
+    gamma : float;  (* The Expansion factor *)
+    delta : float;  (* The Shrinkage (Massive Contraction) factor *)
   } 
 
 (** Default Simplex Strategy defined by NMS *)
@@ -24,14 +22,16 @@ let verify_strategy strat =
   (strat.delta > 0.0  && strat.delta < 1.0)
 
 (** Get the worst, second worst, and best element of the simplex. return the
-    index so we know to replace the proper point. *)
+    index so we know to replace the proper point. Here we sort the elements,
+    although if the dimension is high, it may be worthwhile to do an O(n) pass
+    through the array of elements in the simplex. *)
 let get_simplex_hsl (simplex: 'a simplex) : int * int * int =
   let get_cost (_,(_,x)) = x in
   Array.sort (fun x y -> compare (get_cost y) (get_cost x)) simplex;
   (0, 1, ((Array.length simplex)-1))
 
 (** General Simplex termination; this is done through the standard deviation of
-    the simplex. *)
+    the elements of the simplex. *)
 let simplex_termination_stddev tol simplex =
   let n_plus_one = float_of_int (Array.length simplex) in
   let mean =
@@ -58,8 +58,8 @@ let simplex_termination_stationary tol simplex =
   in
   ((high-.low) /. (1.0 +. (abs_float low))) < tol
 
-(** Calculate the centroid of a simplex. Defined by the mean of the value,
-    excluding the highest (worst) point. *)
+(** Calculate the centroid of a simplex. Defined by the mean of the values of
+    the simplex excluding the highest (worst) point. *)
 let centroid (simplex:'a simplex) h_i =
   let n = Array.length (fst simplex.(0)) in
   let c_array = Array.make n 0.0 in
@@ -83,10 +83,10 @@ let centroid (simplex:'a simplex) h_i =
         shrink      - x = high point, y = all,      coef = -delta *)
 let create_new_point f t strategy xvec yvec : float array * ('a * float) =
   let coef = match t with
-    | `Reflection   -> strategy.alpha
-    | `Contraction  -> ~-. (strategy.beta)
-    | `Expansion    -> ~-. (strategy.gamma)
-    | `Shrink       -> ~-. (strategy.delta)
+    | `Reflection   ->     strategy.alpha
+    | `Contraction  -> ~-. strategy.beta
+    | `Expansion    -> ~-. strategy.gamma
+    | `Shrink       -> ~-. strategy.delta
   in
   let ret = Array.copy xvec in
   for i = 0 to (Array.length xvec) - 1 do

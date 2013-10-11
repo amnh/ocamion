@@ -1,1 +1,9 @@
+<**/*.{byte,native}> : package(pareto)
+<**/*.cm{x,}a>       : package(pareto)
+<**/*.top>           : package(pareto)
+
+"lib/bench.ml"       : package(pareto)
+
+"lib/internal.ml"    : use_compatibility
+
 <lib> : include

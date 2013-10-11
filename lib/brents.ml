@@ -1,5 +1,10 @@
 open Numerical
 
+(** A type definition for a function to bracket a minimum. *)
+type bracket_fn =
+  (float -> 'a * float) -> float * ('a * float) ->
+    (float * ('a * float)) * (float * ('a * float)) * (float * ('a * float))
+
 (** A general helper function for bracketing a minimum. *)
 let bracket_region ?(v_min=neg_infinity) ?(v_max=infinity) f o' =
   let minmax value = max (min v_max value) v_min in

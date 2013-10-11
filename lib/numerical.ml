@@ -30,18 +30,12 @@ and is_inf x = match classify_float x with
         | FP_nan | FP_zero | FP_subnormal | FP_normal -> false
 
 
-(** {6 Types} *)
-
 (** {6 Numerical Functions for Optimization Routines *)
 
 (** find the derivative of a single variable function *)
 let derivative ?(epsilon=epsilon) f x fx =
     let f_new = f (x +. epsilon) in
     (f_new -. fx) /. epsilon
-
-(** find the magnitude of a vector x_array *)
-let magnitude x_array = 
-    sqrt (Array.fold_left (fun acc x -> acc +. (x *. x)) 0.00 x_array)
 
 (** find the gradient of a multi-variant function at a point x_array *)
 let gradient ?(epsilon=epsilon) f_ x_array f_array : float array =
