@@ -83,10 +83,10 @@ let centroid (simplex:'a simplex) h_i =
         shrink      - x = high point, y = all,      coef = -delta *)
 let create_new_point f t strategy xvec yvec : float array * ('a * float) =
   let coef = match t with
-    | `Reflection   ->     strategy.alpha
-    | `Contraction  -> ~-. strategy.beta
-    | `Expansion    -> ~-. strategy.gamma
-    | `Shrink       -> ~-. strategy.delta
+    | `Reflection   ->     (strategy.alpha)
+    | `Contraction  -> ~-. (strategy.beta)
+    | `Expansion    -> ~-. (strategy.gamma)
+    | `Shrink       -> ~-. (strategy.delta)
   in
   let ret = Array.copy xvec in
   for i = 0 to (Array.length xvec) - 1 do

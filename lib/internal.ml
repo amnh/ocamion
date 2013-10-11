@@ -11,3 +11,5 @@ ELSE
 
 END
 
+let unit_wrapper f = (fun i -> (), f i)
+

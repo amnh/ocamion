@@ -2,8 +2,7 @@
 <**/*.cm{x,}a>       : package(pareto)
 <**/*.top>           : package(pareto)
 
-"lib/bench.ml"       : package(pareto)
-
+<lib/bench.ml{i,}>   : package(pareto)
 "lib/internal.ml"    : use_compatibility
 
 <lib> : include

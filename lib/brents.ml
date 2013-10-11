@@ -1,7 +1,7 @@
 open Numerical
 
 (** A type definition for a function to bracket a minimum. *)
-type bracket_fn =
+type 'a bracket_fn =
   (float -> 'a * float) -> float * ('a * float) ->
     (float * ('a * float)) * (float * ('a * float)) * (float * ('a * float))
 
