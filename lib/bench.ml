@@ -16,7 +16,7 @@ let bench ~d ~range ~n ~f : (string * (Summary.t * Summary.t)) list =
   in
   let init =
     let (lo,hi) = range in
-    (fun () -> Array.init d (fun _ -> (Random.float (lo+.hi)) -. lo))
+    (fun () -> Array.init d (fun _ -> (Random.float (hi-.lo)) -. lo))
   in
   let empty = Summary.empty, Summary.empty in
   let rec for_num_iter ((time,res) as acc) optf n =
@@ -36,23 +36,23 @@ let bench ~d ~range ~n ~f : (string * (Summary.t * Summary.t)) list =
     MultiOptimize.all
 
 let bench_table ?(columns=[`Name;`N;`Time_Mean;`Time_StdDev;`Result_Mean;`Result_StdDev]) summaries =
-  let lookup_col (name,(time,result)) = function
-    | `Name          -> name
-    | `N             -> Summary.size     time   |> string_of_int
-    | `Time_StdDev   -> Summary.sd       time   |> string_of_float
-    | `Result_StdDev -> Summary.sd       result |> string_of_float
-    | `Time_Mean     -> Summary.mean     time   |> string_of_float
-    | `Result_Mean   -> Summary.mean     result |> string_of_float
-    | `Time_Var      -> Summary.variance time   |> string_of_float
-    | `Result_Var    -> Summary.variance result |> string_of_float
-    | `Time_Kurt     -> Summary.kurtosis time   |> string_of_float
-    | `Result_Kurt   -> Summary.kurtosis result |> string_of_float
-    | `Time_Skew     -> Summary.skewness time   |> string_of_float
-    | `Result_Skew   -> Summary.skewness result |> string_of_float
-    | `Time_Min      -> Summary.min      time   |> string_of_float
-    | `Result_Min    -> Summary.min      result |> string_of_float
-    | `Time_Max      -> Summary.max      time   |> string_of_float
-    | `Result_Max    -> Summary.max      result |> string_of_float
+  let lookup_col (n,(t,r)) = function
+    | `Name          -> n
+    | `N             -> Summary.size     t |> string_of_int
+    | `Time_StdDev   -> Summary.sd       t |> string_of_float
+    | `Result_StdDev -> Summary.sd       r |> string_of_float
+    | `Time_Mean     -> Summary.mean     t |> string_of_float
+    | `Result_Mean   -> Summary.mean     r |> string_of_float
+    | `Time_Var      -> Summary.variance t |> string_of_float
+    | `Result_Var    -> Summary.variance r |> string_of_float
+    | `Time_Kurt     -> Summary.kurtosis t |> string_of_float
+    | `Result_Kurt   -> Summary.kurtosis r |> string_of_float
+    | `Time_Skew     -> Summary.skewness t |> string_of_float
+    | `Result_Skew   -> Summary.skewness r |> string_of_float
+    | `Time_Min      -> Summary.min      t |> string_of_float
+    | `Result_Min    -> Summary.min      r |> string_of_float
+    | `Time_Max      -> Summary.max      t |> string_of_float
+    | `Result_Max    -> Summary.max      r |> string_of_float
   and lookup_head = function
     | `Time_StdDev   -> "StdDev Time"
     | `Result_StdDev -> "StdDev Result"
@@ -81,18 +81,24 @@ let bench_table ?(columns=[`Name;`N;`Time_Mean;`Time_StdDev;`Result_Mean;`Result
   Array.of_list @@ (Array.map lookup_head columns) :: table_body
 
 let output_bench ~channel (m : string array array) =
+  let fold_lefti f i a =
+    let acc = ref i in
+    for i = 0 to (Array.length a)-1 do
+      acc := f !acc i a.(i)
+    done;
+    !acc
+  in
   let widths =
     Array.init
-      (Array.length m)
-      (fun i ->
-        Array.fold_left
-          (fun acc elt_ij -> max acc (String.length elt_ij)) 0 m.(i))
+      (Array.length m.(0))
+      (fun j ->
+        fold_lefti (fun acc i _ -> max acc (String.length m.(i).(j))) 0 m)
   in
   Array.iteri
     (fun _ row_i ->
       Array.iteri
         (fun j elt_ij ->
-          Printf.fprintf channel "% *s" widths.(j) elt_ij)
+          Printf.fprintf channel "% *s | " widths.(j) elt_ij)
         row_i;
       Printf.fprintf channel "\n")
     m

@@ -1,3 +1,5 @@
+open Internal
+
 type 'a llist = Nil | Cons of 'a * ('a llist) Lazy.t
 
 let ( !$ ) a = Lazy.force a
