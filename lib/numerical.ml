@@ -15,19 +15,31 @@ let golden = 0.3819660 (*-- constant for the golden ratio *)
 
 (** Check if a value is zero (takes into account negative; and subnormal *)
 let is_zero x = match classify_float x with
-        | FP_zero | FP_subnormal -> true
-        | FP_infinite | FP_nan | FP_normal -> false
+  | FP_zero | FP_subnormal -> true
+  | FP_infinite | FP_nan | FP_normal -> false
 
 (** Check if a value is Not A Number *)
 and is_nan x = match classify_float x with
-        | FP_zero | FP_subnormal
-        | FP_infinite | FP_normal -> false
-        | FP_nan -> true
+  | FP_zero | FP_subnormal
+  | FP_infinite | FP_normal -> false
+  | FP_nan -> true
 
 (** Check if a value is +/- infinity *)
 and is_inf x = match classify_float x with
-        | FP_infinite -> true
-        | FP_nan | FP_zero | FP_subnormal | FP_normal -> false
+  | FP_infinite -> true
+  | FP_nan | FP_zero | FP_subnormal | FP_normal -> false
+
+
+(** {6 Floating Point Comparisons} *)
+
+(** test equality by the absolute error comparison; when range is known. *)
+let eq_float_abs ~epsilon a b = (abs_float (a-.b)) <= epsilon
+
+(** test equality by the relative difference; implementation as in GSL *)
+let eq_float_gsl ~epsilon a b =
+  let _,exp = frexp @@ max (abs_float a) (abs_float b) in
+  let delta = ldexp epsilon exp in
+  (abs_float (a-.b)) < delta
 
 
 (** {6 Numerical Functions for Optimization Routines *)

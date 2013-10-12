@@ -29,6 +29,12 @@ val is_inf : float -> bool
 val is_zero : float -> bool
 (** is the floating point number zero or sub-normal (effectively zero). *)
 
+val eq_float_abs : epsilon:float -> float -> float -> bool
+(** test equality by absolute difference. Usefull if range is known. *)
+
+val eq_float_gsl : epsilon:float -> float -> float -> bool
+(** test equality by relative difference. Same basic implementation as GSL. *)
+
 
 (** {6 Numerical Derivative Functions} *)
 
