@@ -4,5 +4,17 @@
 
 <lib/bench.ml{i,}>   : package(pareto)
 "lib/internal.ml"    : use_compatibility
+<lib/ocamion.ml{i,}> : package(pareto)
 
 <lib> : include
+
+# for ocamion library package
+"lib/bench.cmx"         : for-pack(Ocamion)
+"lib/bfgs.cmx"          : for-pack(Ocamion)
+"lib/brents.cmx"        : for-pack(Ocamion)
+"lib/llist.cmx"         : for-pack(Ocamion)
+"lib/lineSearch.cmx"    : for-pack(Ocamion)
+"lib/numerical.cmx"     : for-pack(Ocamion)
+"lib/simplex.cmx"       : for-pack(Ocamion)
+"lib/subplex.cmx"       : for-pack(Ocamion)
+"lib/multiOptimize.cmx" : for-pack(Ocamion)

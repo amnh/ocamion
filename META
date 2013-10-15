@@ -1,7 +1,7 @@
 name = "ocamion"
 version = "0.1"
 description = "Numerical/Combinatorial Optimization Library"
-requires = ""
+requires = "pareto"
 archive(byte) = "ocamion.cma"
 archive(native) = "ocamion.cmxa"
 exists_if = "ocamion.cma"
