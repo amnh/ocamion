@@ -6,8 +6,8 @@ BUILD=ocamlbuild -use-ocamlfind
 OFIND=ocamlfind
 
 INST_BYT=_build/ocamion.cma
-INST_NAT=_build/ocamion.cmxa _build/ocamion.a
-INST_OTH=_build/lib/*.mli _build/lib/*.cm[iox]
+INST_NAT=_build/ocamion.cmxa _build/ocamion.a _build/ocamion.cmx
+INST_OTH=_build/lib/*.mli _build/ocamion.cm[io]
 
 # -----------------------------------
 
