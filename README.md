@@ -1,5 +1,3 @@
-.. contents::
-
 OCamion
 =======
 
