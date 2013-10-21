@@ -43,17 +43,11 @@ val find_subspace : subplex_strategy -> float array -> int array list
 val subplex_termination :
   subplex_strategy -> float -> float array -> float array -> float array -> bool
 
+
 (** {2 Optimization Function} *)
 
-(** [optimize ?subplex_stragegy ?tol ?max_iter ?select_subspace f i]
- 
-
-
-*)
+(** [optimize ?subplex_stragegy ?tol ?max_iter ?select_subspace f i] *)
 val optimize :
-  ?subplex_strategy:subplex_strategy ->
-  ?tol:float ->
-  ?max_iter:int ->
-  ?select_subspace:(subplex_strategy -> float array -> int array list) ->
-  (float array -> 'a * float) ->
-  float array * ('a * float) -> float array * ('a * float)
+  ?subplex_strategy:subplex_strategy -> ?tol:float -> ?max_iter:int ->
+    ?select_subspace:(subplex_strategy -> float array -> int array list) ->
+      f:(float array -> 'a * float) -> float array * ('a * float) -> float array * ('a * float)

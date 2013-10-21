@@ -1,3 +1,5 @@
+open Internal
+
 (** {6 Constants} *)
 
 let tolerance = 1e-6
@@ -50,7 +52,7 @@ let derivative ?(epsilon=epsilon) f x fx =
     (f_new -. fx) /. epsilon
 
 (** find the gradient of a multi-variant function at a point x_array *)
-let gradient ?(epsilon=epsilon) f_ x_array f_array : float array =
+let gradient ?(epsilon=epsilon) ~f x_array f_array : float array =
     let i_replace i x v = let y = Array.copy x in Array.set y i v; y in
     Array.mapi
         (fun i i_val ->
@@ -58,7 +60,7 @@ let gradient ?(epsilon=epsilon) f_ x_array f_array : float array =
                     ~epsilon
                     (fun x ->
                         let newvec = i_replace i x_array x in
-                        f_ newvec)
+                        f newvec)
                     i_val
                     f_array)
         x_array

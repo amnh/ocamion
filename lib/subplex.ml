@@ -189,7 +189,7 @@ let subplex_termination strat tol dx x stp =
     Simplex with restart. The advantages are outlined in the previously
     mentioned paper, in section 5.3.6. *)
 let optimize ?(subplex_strategy=default_subplex) ?(tol=tolerance) ?(max_iter=50) 
-             ?(select_subspace=find_subspace) f (p,fp) =
+             ?(select_subspace=find_subspace) ~f (p,fp) =
   let i = ref 0 in
   let rec subplex_loop step subs ((x,_) as xfx) dx =
     incr i;
@@ -202,7 +202,7 @@ let optimize ?(subplex_strategy=default_subplex) ?(tol=tolerance) ?(max_iter=50)
           let sub_vec = make_subspace_vector sub x in
           let step    = Some (make_subspace_vector sub step) in
           let (nx,nfx) =
-            Simplex.optimize ~simplex_strategy ~step (function_of_subspace f x sub) (sub_vec,fx)
+            Simplex.optimize ~simplex_strategy ~step ~f:(function_of_subspace f x sub) (sub_vec,fx)
           in
           replace_subspace_vector sub nx x;
           (x,nfx))

@@ -1,14 +1,22 @@
 open Internal
 open Numerical
 
+type 'a line_search_fn =
+  ?epsilon:float -> gradient:float array -> maxstep:float -> direction:float array ->
+    (float array -> 'a * float) -> float array * ('a * float) -> float array * ('a * float)
+
+type gradient_fn =
+  f:(float array -> float) -> float array -> float -> float array
+
+
 (** BFGS Algorithm; Gradient Search Function *)
 let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance)
              ?(gradient=gradient ~epsilon) ?(line_search=LineSearch.optimize)
-             f (p,fp) =
+             ~f (p,fp) =
   let n = Array.length p and nf = float_of_int (Array.length p) and get_cost x = snd x  in
   let gradient f p fp =
     let f x = get_cost @@ f x in
-    gradient f p @@ get_cost fp
+    gradient ~f p @@ get_cost fp
   in
   (* Test convergence of a point --that it equals the direction, essentially *)
   let converged_l direction test_array =
@@ -39,9 +47,9 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
     and x_grad = gradient f_array x_array fx_array in
     let dir = Array.map (fun x -> ~-. x) x_grad
     and mxstep = max_step *. (max (two_norm_vec x_array) nf) in
-    hessian, x_grad, mxstep, dir in
+    hessian, x_grad, mxstep, dir
   (* Do a line search step --return new p, new fp, new dir, if converged *)
-  let line_searcher f p fp gradient maxstep direction =
+  and line_searcher f p fp gradient maxstep direction =
     let np,nfp = line_search ~gradient ~maxstep ~direction f (p,fp) in
     let direction = Array.init n (fun i -> np.(i) -. p.(i) ) in
     np, nfp, direction
@@ -62,11 +70,12 @@ let optimize ?(max_iter=200) ?(epsilon=epsilon) ?(max_step=10.0) ?(tol=tolerance
     ngrad, dgrad, hgrad
   (* Update the hessian matrix --skips the update if fac not sufficiently positive *)
   and bfgs_update_matrix dgrad hgrad direc hessian =
-    let fac = Numerical.dot_product dgrad direc
-    and fae = Numerical.dot_product dgrad hgrad
+    let fac = dot_product dgrad direc
+    and fae = dot_product dgrad hgrad
     and sumdgr = Array.fold_left (fun a x -> (x *. x) +. a) 0.0 dgrad
     and sumdir = Array.fold_left (fun a x -> (x *. x) +. a) 0.0 direc in
-    if (fac *. fac) <= (epsilon *. sumdgr *. sumdir) then
+    (* sqr left instead of sqrt right *)
+    if (fac *. fac) < (epsilon *. sumdgr *. sumdir) then
       hessian
     else begin
       let fac = 1.0 /. fac and fad = 1.0 /. fae in

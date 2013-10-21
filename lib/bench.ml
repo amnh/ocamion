@@ -18,7 +18,8 @@ let bench ~d ~range ~n ~f : (string * (Summary.t * Summary.t)) list =
     let (lo,hi) = range in
     (fun () -> Array.init d (fun _ -> (Random.float (hi-.lo)) -. lo))
   in
-  let empty = Summary.empty, Summary.empty in
+  let empty = Summary.empty, Summary.empty
+  and max_iter,tol = None,None in
   let rec for_num_iter ((time,res) as acc) optf n =
     if n = 0 then
       acc
@@ -26,7 +27,7 @@ let bench ~d ~range ~n ~f : (string * (Summary.t * Summary.t)) list =
       begin
         let f,count = f () in
         let i = init () in
-        let r = snd (snd (optf f (i,f i))) in
+        let r = snd (snd (optf ?max_iter ?tol ~f (i,f i))) in
         let c = float_of_int (count ()) in
         for_num_iter (Summary.add time c,Summary.add res r) optf (n-1)
       end

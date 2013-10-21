@@ -17,7 +17,7 @@ module type MOPT =
   sig
     val name : string
     val optimize :
-      ?max_iter:int -> ?tol:float -> (float array -> 'a * float) ->
+      ?max_iter:int -> ?tol:float -> f:(float array -> 'a * float) ->
         (float array * ('a * float)) -> (float array * ('a * float))
   end
 

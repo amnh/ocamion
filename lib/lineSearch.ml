@@ -1,5 +1,7 @@
 open Numerical
 
+type warnings = [ `StepConvergence | `LargeInitialSlope ] list
+
 (** line search along a specified direction; Numerical Recipes in C : 9.7 *)
 let optimize ?(epsilon=epsilon) ~gradient ~maxstep ~direction f (point,fpoint) =
   (* as in the previous function; we over-ride the local equality function for
@@ -31,7 +33,7 @@ let optimize ?(epsilon=epsilon) ~gradient ~maxstep ~direction f (point,fpoint) =
   and next_step step prevstep slope newfpoint prevfpoint = 
     let newstep =
       if step =. 1.0 then
-          ~-. slope /. (2.0 *. (newfpoint -. origfpoint -.  slope))
+        ~-. slope /. (2.0 *. (newfpoint -. origfpoint -.  slope))
       else begin
         let tstep =
           let rhs1 = newfpoint -. origfpoint -. (step *. slope)
@@ -58,13 +60,12 @@ let optimize ?(epsilon=epsilon) ~gradient ~maxstep ~direction f (point,fpoint) =
   (* main algorithm -- first instance sets up some variables *)
   let rec main_ prevfpoint slope direction step prevstep minstep = 
     if step < minstep then
-      (* TODO: add message/result of step-convergence issues *)
-      (point,fpoint)
+      (point,fpoint) (* ,[`StepConvergence]) *)
     else begin
       let newpoint = Array.init n (fun i -> abs_float (point.(i) +. (step *. direction.(i)))) in
       let newfpoint = f newpoint in
       if (get_cost newfpoint) <= origfpoint then begin
-        (newpoint,newfpoint)
+        (newpoint,newfpoint)(*,[]*)
       end else begin
         let newstep = next_step step prevstep slope (get_cost newfpoint) prevfpoint in
         main_ (get_cost newfpoint) slope direction newstep step minstep
@@ -76,5 +77,8 @@ let optimize ?(epsilon=epsilon) ~gradient ~maxstep ~direction f (point,fpoint) =
   (* this could happen if the delta for gradient is huge (ie, errors in rediagnose) 
     * or some major instability in the tree/algorithm. The function will continue, 
     * but this warning message should report that the results are questionable. *)
-  (* TODO: if (abs_float slope) > 1_000_000.0 *)
-  main_ origfpoint slope direction step step minstep
+  let res = main_ origfpoint slope direction step step minstep in
+  if (abs_float slope) > 1_000_000.0
+    then res (*,`LargeInitialSlope::warn *)
+    else res (*,warn *)
+

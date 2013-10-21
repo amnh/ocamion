@@ -68,5 +68,5 @@ val initial_simplex :
 val optimize :
   ?termination_test:(float -> 'a simplex -> bool) -> ?tol:float ->
     ?simplex_strategy:simplex_strategy -> ?max_iter:int ->
-      ?step:float array option -> (float array -> 'a * float) ->
+      ?step:float array option -> f:(float array -> 'a * float) ->
         float array * ('a * float) -> float array * ('a * float)

@@ -146,7 +146,7 @@ let shrink_simplex simplex f strategy i_l =
     by the strategy used. *)
 let optimize ?(termination_test=simplex_termination_stddev) ?(tol=tolerance)
              ?(simplex_strategy=default_simplex) ?(max_iter=100) ?(step=None)
-              f (p,fp) =
+              ~f (p,fp) =
   (* wrap function to keep track of the number of evaluations *)
   let i = ref 0 in
   let f = (fun x -> incr i; f x) in

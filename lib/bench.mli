@@ -40,4 +40,6 @@ val bench_table :
 val output_bench : channel:out_channel -> string array array -> unit
 
 (** Do a full set of operations to output benchmark details. Use default columns. *)
-val report : d:int -> range:float * float -> n:int -> f:(float array -> 'a * float) -> channel:out_channel -> unit
+val report :
+  d:int -> range:float * float -> n:int -> f:(float array -> 'a * float) ->
+    channel:out_channel -> unit

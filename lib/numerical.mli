@@ -38,7 +38,7 @@ val eq_float_gsl : epsilon:float -> float -> float -> bool
 
 (** {6 Numerical Derivative Functions} *)
 
-val gradient : ?epsilon : float -> (float array -> float) -> float array -> float -> float array
+val gradient : ?epsilon : float -> f:(float array -> float) -> float array -> float -> float array
 
 val derivative : ?epsilon : float -> (float -> float) -> float -> float -> float
 

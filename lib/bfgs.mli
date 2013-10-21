@@ -1,11 +1,21 @@
 (** {1 Broyden-Fletcher-Goldfarb-Shanno Method}
-  
-  
-  
-    {b References}
-  
-*)
+    Generate a minimum of a function by a quasi newtons method, that iteratively
+    approximates the inverse hessian matrix.
 
+    {b References}
+      + Jacobs, D.A.H., The State of the Art in Numerical Analysis, 1977
+      + Press, W.H, Teukoisky, S.A., Vetterling W.T,. Flannery, B.P., Numerical
+        Recipes - The Art of Scientific Computing, 2007
+      + Dennis, J.E. and Schnabel, R.B., Numerical Methods for Unconstrained
+        Optimization and Nonlinear Equations, 1983 *)
+
+(** {2 Types} *)
+type 'a line_search_fn =
+  ?epsilon:float -> gradient:float array -> maxstep:float -> direction:float array ->
+    (float array -> 'a * float) -> float array * ('a * float) -> float array * ('a * float)
+
+type gradient_fn =
+  f:(float array -> float) -> float array -> float -> float array
 
 (** {2 Optimization Function} *)
 
@@ -26,16 +36,6 @@
     + [line_search] - A function to search along a particular direction. If none
                     is given the LineSearch.optimize function is used. *)
 val optimize :
-  ?max_iter:int ->
-  ?epsilon:float ->
-  ?max_step:float ->
-  ?tol:float ->
-  ?gradient:((float array -> float) -> float array -> float -> float array) ->
-  ?line_search:(?epsilon:float ->
-                gradient:float array ->
-                maxstep:float ->
-                direction:float array ->
-                (float array -> 'a * float) ->
-                float array * ('a * float) -> float array * ('a * float)) ->
-  (float array -> 'a * float) ->
-  float array * ('a * float) -> float array * ('a * float)
+  ?max_iter:int -> ?epsilon:float -> ?max_step:float -> ?tol:float ->
+    ?gradient:gradient_fn -> ?line_search:'a line_search_fn ->
+      f:(float array -> 'a * float) -> float array * ('a * float) -> float array * ('a * float)

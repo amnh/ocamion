@@ -7,8 +7,11 @@
     +
 *)
 
-(** [optimize ?epsilon ~gradient ~maxstep ~direction f i]
+type warnings = [ `StepConvergence | `LargeInitialSlope ] list
 
+(** [optimize ?epsilon ~gradient ~maxstep ~direction f i]
+  Optimize the function [f] in the direction specified with a maximum step being
+  [maxstep]. We itertively search from maxstep down to a minimum 
  
 *)
 val optimize :

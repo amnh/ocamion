@@ -1,12 +1,15 @@
+open Internal
 open Numerical
+
+(** {2 Bracketing a Region} *)
 
 (** A type definition for a function to bracket a minimum. *)
 type 'a bracket_fn =
-  (float -> 'a * float) -> float * ('a * float) ->
+  f:(float -> 'a * float) -> float * ('a * float) ->
     (float * ('a * float)) * (float * ('a * float)) * (float * ('a * float))
 
 (** A general helper function for bracketing a minimum. *)
-let bracket_region ?(v_min=neg_infinity) ?(v_max=infinity) f o' =
+let bracket_region ?(v_min=neg_infinity) ?(v_max=infinity) ~f o' =
   let minmax value = max (min v_max value) v_min in
   let (=.) a b = epsilon > (abs_float (a-.b)) in
   let rec create_scaled (v,_) s = 
@@ -37,11 +40,13 @@ let bracket_region ?(v_min=neg_infinity) ?(v_max=infinity) f o' =
   bracket_region (create_scaled o' 0.2) o' (create_scaled o' 2.0)
 
 
+(** {2 Optimization Routine} *)
+
 (** Uses a combination of golden section searches and parabolic fits to find the
     optimal value of a function of one variable. **)
 let optimize ?(max_iter=200) ?(v_min=neg_infinity) ?(v_max=infinity)
              ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
-              f orig =
+              ~f orig =
   (*-- ensure value falls between range; if using one *)
   let minmax value = max (min v_max value) v_min in
   (*-- approximation of equality; based on optional argument above *)
@@ -112,23 +117,48 @@ let optimize ?(max_iter=200) ?(v_min=neg_infinity) ?(v_max=infinity)
       end
     end
   in
-  let (lv,_),m,(hv,_) = bracket f orig in
+  let (lv,_),m,(hv,_) = bracket ~f orig in
   brent m m m lv hv 0.0 0.0 0 (fst m)
 
 
-(** Meta function above; we sequentially modify each variable ONCE; RAxML *)
+(** {2 Convergence for Optimization} *)
+
+type converge =
+  tol:float -> epsilon:float -> prev_array:float array -> prev_cost:float ->
+    new_array:float array -> new_cost:float -> bool
+
+let converge_one_pass ~tol:_ ~epsilon:_ ~prev_array:_ ~prev_cost:_ ~new_array:_ ~new_cost:_ =
+  false
+
+and converge_vec ~tol:_ ~epsilon ~prev_array ~prev_cost:_ ~new_array ~new_cost:_ =
+  let diff = sub_vec prev_array new_array in
+  Array.fold_left (fun acc dx -> acc && (eq_float_abs ~epsilon 0.0 dx)) true diff
+
+and converge_cost ~tol:_ ~epsilon ~prev_array:_ ~prev_cost ~new_array:_ ~new_cost =
+  eq_float_abs ~epsilon prev_cost new_cost
+
+
+(** {2 Multi-Dimensional Optimization Routine} *)
+
+(** Meta function to accomidate multi-dimensional data. The converge function
+    deals with how to define convergence, by default we converge at cost. *)
 let optimize_multi ?(max_iter=200) ?(v_min=minimum) ?(v_max=300.0)
-    ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max) f orig =
-  let rec do_single i ((a,x) as data) =
-    if i < (Array.length a) then
-      let (v,fv) = optimize ~max_iter ~v_min ~v_max ~tol ~epsilon ~bracket (update_single i a) (a.(i),x) in
-      let () = Array.set a i v in
-      do_single (i+1) (a,fv)
+          ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
+          ?(converge=converge_one_pass) ~f orig =
+  let rec do_single costs i ((a,x) as data) =
+    let f = update_single i a in
+    let (v,fv) = optimize ~max_iter ~v_min ~v_max ~tol ~epsilon ~bracket ~f (a.(i),x) in
+    let () = Array.set a i v in
+    if i = (Array.length a)-1 then
+      let prev_array,prev_cost = costs in
+      if converge ~tol ~epsilon ~prev_array ~prev_cost ~new_array:a ~new_cost:(snd fv)
+        then data
+        else do_single (a,snd fv) 0 (a,fv)
     else
-      data
+      do_single costs (i+1) (a,fv)
   and update_single i a v =
     let a = Array.copy a in
     let () = Array.set a i v in
     f a
   in
-  do_single 0 orig
+  do_single (fst orig,snd @@ snd orig) 0 orig

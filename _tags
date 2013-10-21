@@ -4,9 +4,9 @@
 
 <lib/bench.ml{i,}>   : package(pareto)
 "lib/internal.ml"    : use_compatibility
-<lib/ocamion.ml{i,}> : package(pareto)
 
-<lib> : include
+"lib" : include
+true  : annot, bin_annot
 
 # for ocamion library package
 "lib/bench.cmx"         : for-pack(Ocamion)
