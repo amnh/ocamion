@@ -36,7 +36,7 @@ val optimize :
       float * ('a * float) -> float * ('a * float)
 
 
-(** {2 Convergence for Optimization} *)
+(** {2 Convergence for Multi-Dimensional Optimization} *)
 
 (** A type to define a convergence function for the multi-dimensional
     optimization routine. *)
@@ -58,8 +58,8 @@ val converge_cost : converge
 
 (** [optimize_multi ?max_iter ?v_min ?v_max ?tol ?epsilon ?bracket ?converge f i]
     Uses brents method on each variable of the array in order until the
-    convergence function returns true --the function is called each time all the
-    variables are optimized independently. *)
+    convergence function returns true --the converge function is called each
+    after each round of all elements of vector are independently optimized. *)
 val optimize_multi :
   ?max_iter:int -> ?v_min:float -> ?v_max:float -> ?tol:float ->
     ?epsilon:float -> ?bracket:'a bracket_fn -> ?converge:converge ->

@@ -144,7 +144,7 @@ and converge_cost ~tol:_ ~epsilon ~prev_array:_ ~prev_cost ~new_array:_ ~new_cos
     deals with how to define convergence, by default we converge at cost. *)
 let optimize_multi ?(max_iter=200) ?(v_min=minimum) ?(v_max=300.0)
           ?(tol=tolerance) ?(epsilon=epsilon) ?(bracket=bracket_region ~v_min ~v_max)
-          ?(converge=converge_one_pass) ~f orig =
+          ?(converge=converge_cost) ~f orig =
   let rec do_single costs i ((a,x) as data) =
     let f = update_single i a in
     let (v,fv) = optimize ~max_iter ~v_min ~v_max ~tol ~epsilon ~bracket ~f (a.(i),x) in
